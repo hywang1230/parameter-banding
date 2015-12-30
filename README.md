@@ -18,3 +18,6 @@
     </mvc:annotation-driven>
 ```
 不支持<mvc:argument-resolvers></mvc:argument-resolvers>标签的请把Spring的XML检验文件改成3.1以上
+
+### 注意项
+和继承PropertyEditorSupport等类型转换共同使用有问题,类型转换会不生效,请使用Converter接口做类型转换
