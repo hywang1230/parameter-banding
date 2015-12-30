@@ -12,7 +12,17 @@
     http://www.springframework.org/schema/mvc/spring-mvc-3.2.xsd
     ">
 
-    <mvc:annotation-driven>
+    <bean id="conversionService"
+          class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
+
+        <property name="converters">
+            <set>
+                <bean class="name.wangrong.converter.DateConverter" />
+            </set>
+        </property>
+    </bean>
+
+    <mvc:annotation-driven conversion-service="conversionService">
         <mvc:argument-resolvers>
             <bean class="name.wangrong.binder.RenamingProcessor">
                 <constructor-arg name="annotationNotRequired" value="true"/>
