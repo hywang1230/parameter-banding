@@ -8,7 +8,6 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import org.springframework.web.servlet.mvc.method.annotation.ServletModelAttributeMethodProcessor;
 
 import java.lang.reflect.Field;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -32,8 +31,9 @@ public class RenamingProcessor extends ServletModelAttributeMethodProcessor {
         Class<?> targetClass = target.getClass();
 
         if (! replaceMap.containsKey(targetClass)) {
-            Map<String, String> mapping = analyzeClass(targetClass);
-            replaceMap.put(targetClass, mapping);
+            Map<String, String> renameMap = new HashMap<String, String>();
+            analyzeClass(targetClass, renameMap);
+            replaceMap.put(targetClass, renameMap);
         }
 
         Map<String, String> mapping = replaceMap.get(targetClass);
@@ -42,10 +42,9 @@ public class RenamingProcessor extends ServletModelAttributeMethodProcessor {
         super.bindRequestParameters(paramNameDataBinder, request);
     }
 
-    private Map<String, String> analyzeClass(Class<?> targetClass) {
+    private void analyzeClass(Class<?> targetClass, Map<String, String> renameMap) {
         Field[] fields = targetClass.getDeclaredFields();
 
-        Map<String, String> renameMap = new HashMap<String, String>();
         for (Field field : fields) {
             ParamName paramNameAnnotation = field.getAnnotation(ParamName.class);
             if (paramNameAnnotation != null && !paramNameAnnotation.value().isEmpty()) {
@@ -53,10 +52,12 @@ public class RenamingProcessor extends ServletModelAttributeMethodProcessor {
             }
         }
 
-        if (renameMap.isEmpty()) {
-            return Collections.emptyMap();
+        Class<?> superClass = targetClass.getSuperclass();
+        if (superClass == null) {
+            return;
+        } else {
+            analyzeClass(superClass, renameMap);
         }
 
-        return renameMap;
     }
 }
